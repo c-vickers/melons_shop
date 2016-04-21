@@ -66,16 +66,24 @@ def shopping_cart():
     #
     # - get the list-of-ids-of-melons from the session cart
     melons_ordered = session['cart']
-    melons = {}
-    for melon in melons_ordered:
-#if melon in dictionary key already quantity += 1, else add to dictionary quantity = 1...and figure out how to do the cost
+    melons_dictionary = {}
+    for i in melons_ordered:
+        melon_name = melons.melon_types[i].common_name
+        if melon_name in melons_dictionary:
+            melons_dictionary[melon_name] += 1
+        else:
+            melons_dictionary.setdefault(melon_name, 1)
+    print melons_dictionary
+        
+#if melon in dictionary key already quantity += 1, else add to dictionary quantity = 1
+#...and figure out how to do the cost
     # - loop over this list:
     #   - keep track of information about melon types in the cart
     #   - keep track of the total amt ordered for a melon-type
     #   - keep track of the total amt of the entire order
     # - hand to the template the total order cost and the list of melon types
 
-    return render_template("cart.html")
+    return #render_template("cart.html")
 
 
 @app.route("/add_to_cart/<int:id>")
@@ -91,10 +99,11 @@ def add_to_cart(id):
     # The logic here should be something like:
     #
     # - add the id of the melon they bought to the cart in the session
-    if session.get('add_to_cart') != None:
+    if session.get('cart') != None:
         session['cart'].append(id)
     else:
         session['cart'] = [id]
+    print session["cart"]
     flash("Melon added to cart!")
 
     return render_template("cart.html")
