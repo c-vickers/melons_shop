@@ -62,28 +62,49 @@ def shopping_cart():
 
     # TODO: Display the contents of the shopping cart.
 
-    # The logic here will be something like:
-    #
-    # - get the list-of-ids-of-melons from the session cart
-    melons_ordered = session['cart']
-    melons_dictionary = {}
-    for i in melons_ordered:
-        melon_name = melons.melon_types[i].common_name
-        if melon_name in melons_dictionary:
-            melons_dictionary[melon_name] += 1
-        else:
-            melons_dictionary.setdefault(melon_name, 1)
-    print melons_dictionary
-        
-#if melon in dictionary key already quantity += 1, else add to dictionary quantity = 1
-#...and figure out how to do the cost
-    # - loop over this list:
-    #   - keep track of information about melon types in the cart
-    #   - keep track of the total amt ordered for a melon-type
-    #   - keep track of the total amt of the entire order
-    # - hand to the template the total order cost and the list of melon types
+    #initiate order_total variable
+    order_total = 0
 
-    return #render_template("cart.html")
+    #get the cart list saved in the session. Below will get empty list if cart hasn't been created
+    melons_ordered = session.get('cart', [])
+    
+    #initiate empty dictionary (we will add items to here later) 
+    melons_dict = {}
+    
+    #loop over info in melons_ordered (orignally from session[cart])
+    for i in melons_ordered:
+
+        #if the item (i) is already a key in melon_dict then cart_info should equal value
+        #previously added to the dictionary
+        if i in melons_dict:
+            cart_info = melons_dict[i]
+
+        #if the item (i) is NOT in the dictionary...
+        else:
+    #Create a melon_type variable that holds info for i pulled from melons.py using method get_by_id
+            melon_type = melons.get_by_id(i)
+    #Assign melons_dict[i] to new variable cart_info (so it is easier to call later.)
+    #The value of cart_info (a.k.a. melons_dict[i]) at i will be a nested dictionary
+            cart_info = melons_dict[i] = {
+    #Set the key/value pairs of the nested dictionary inside melons_dict[i] (a.k.a. cart_info) at i
+    #based on info pulled into melon_type (see line85) for that i
+            'common_name': melon_type.common_name,
+            'unit_cost': melon_type.price,
+            'qty': 0,
+            'total_cost': 0,
+            }
+    #Call the variable cart_info (a.k.a melons_dict[i]...so a key in a dictionary)
+    #Update the value of the listed nested keys
+        cart_info['qty'] += 1
+        cart_info['total_cost'] += cart_info['unit_cost']
+
+        #increment order_total using unit cost
+        order_total += cart_info['unit_cost']
+
+    #unpacking your nested dictionaries by calling values
+    melon_dict = melon_dict.values()
+
+    return render_template("cart.html", cart=melon_dict, order_total=order_total)
 
 
 @app.route("/add_to_cart/<int:id>")
